@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Markdown Collector</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <div>
+            <h1>Markdown Collector</h1>
+            <p id="headerSubline">Workspace ready</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <span id="themeIcon" aria-hidden="true">☾</span>
+          </button>
+          <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings">
+            <span aria-hidden="true">⚙</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="action-bar" aria-label="Primary actions">
+        <button class="primary-button" id="captureButton" type="button">
+          <span class="spinner" id="captureSpinner" aria-hidden="true"></span>
+          <span id="captureLabel">Capture Page</span>
+        </button>
+        <button class="secondary-button" id="addCustomButton" type="button">+ Add Custom</button>
+      </section>
+
+      <section class="workspace-view" id="workspaceView">
+        <div class="tabs" role="tablist" aria-label="Workspace sections">
+          <button class="tab-button is-active" id="pagesTab" type="button" role="tab" aria-selected="true" aria-controls="pagesPanel">Pages</button>
+          <button class="tab-button" id="combineTab" type="button" role="tab" aria-selected="false" aria-controls="combinePanel">Combine</button>
+        </div>
+
+        <div class="panel" id="pagesPanel" role="tabpanel" aria-labelledby="pagesTab">
+          <div class="empty-state hidden" id="emptyState">
+            <div class="empty-illustration" aria-hidden="true">◆</div>
+            <h2>No pages collected</h2>
+            <p>Capture the current tab or add a custom note to start a workspace.</p>
+          </div>
+          <ul class="page-list" id="pageList" aria-label="Collected pages"></ul>
+        </div>
+
+        <div class="panel hidden" id="combinePanel" role="tabpanel" aria-labelledby="combineTab">
+          <div class="combine-header">
+            <div>
+              <h2>Batch Export</h2>
+              <p id="combineSummary">0 selected</p>
+            </div>
+            <div class="select-actions">
+              <button class="text-button" id="selectAllButton" type="button">Select all</button>
+              <button class="text-button" id="selectNoneButton" type="button">None</button>
+            </div>
+          </div>
+          <div class="empty-state hidden" id="combineEmptyState">
+            <div class="empty-illustration" aria-hidden="true">◇</div>
+            <h2>Nothing to combine</h2>
+            <p>Collected pages will appear here with export checkboxes.</p>
+          </div>
+          <ul class="combine-list" id="combineList" aria-label="Pages selected for export"></ul>
+          <div class="batch-grid" aria-label="Batch export actions">
+            <button class="secondary-button" id="copyAllButton" type="button">Copy All</button>
+            <button class="secondary-button" id="exportAllMdButton" type="button">Export .md</button>
+            <button class="secondary-button" id="exportAllPdfButton" type="button">Export PDF</button>
+            <button class="secondary-button" id="exportZipButton" type="button">Export ZIP</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-view hidden" id="detailView" aria-live="polite">
+        <div class="detail-toolbar">
+          <button class="ghost-button" id="backButton" type="button">← Back</button>
+          <div class="detail-actions">
+            <button class="secondary-button compact" id="editButton" type="button">Edit</button>
+            <button class="secondary-button compact hidden" id="saveEditButton" type="button">Save</button>
+            <button class="ghost-button compact hidden" id="cancelEditButton" type="button">Cancel</button>
+          </div>
+        </div>
+
+        <div class="detail-meta">
+          <h2 id="detailTitle"></h2>
+          <label class="field hidden" id="detailTitleField">
+            <span>Title</span>
+            <input id="detailTitleInput" type="text" autocomplete="off">
+          </label>
+          <a id="detailUrl" href="#" target="_blank" rel="noreferrer"></a>
+          <div class="meta-line" id="detailStats"></div>
+        </div>
+
+        <div class="markdown-preview" id="markdownPreview" tabindex="0" aria-label="Markdown preview"></div>
+        <textarea class="markdown-editor hidden" id="markdownEditor" spellcheck="false" aria-label="Markdown editor"></textarea>
+
+        <div class="individual-actions" aria-label="Page export actions">
+          <button class="secondary-button" id="copyPageButton" type="button">Copy</button>
+          <button class="secondary-button" id="downloadPageButton" type="button">Download .md</button>
+          <button class="secondary-button" id="pdfPageButton" type="button">Export PDF</button>
+        </div>
+      </section>
+
+      <section class="settings-view hidden" id="settingsView">
+        <div class="detail-toolbar">
+          <button class="ghost-button" id="settingsBackButton" type="button">← Back</button>
+        </div>
+        <div class="settings-panel">
+          <h2>Settings</h2>
+          <label class="toggle-row">
+            <span>
+              <strong>YAML frontmatter</strong>
+              <small>Include title, URL, and capture date</small>
+            </span>
+            <input id="frontmatterToggle" type="checkbox">
+          </label>
+          <label class="field">
+            <span>Heading style</span>
+            <select id="headingStyleSelect">
+              <option value="atx">ATX (#)</option>
+              <option value="setext">Setext (===)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Bullet marker</span>
+            <select id="bulletMarkerSelect">
+              <option value="-">-</option>
+              <option value="*">*</option>
+              <option value="+">+</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Code block style</span>
+            <select id="codeBlockStyleSelect">
+              <option value="fenced">Fenced</option>
+              <option value="indented">Indented</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Default export</span>
+            <select id="defaultExportSelect">
+              <option value="markdown">Markdown</option>
+              <option value="pdf">PDF</option>
+              <option value="zip">ZIP</option>
+            </select>
+          </label>
+          <button class="danger-button" id="clearWorkspaceButton" type="button">Clear workspace</button>
+        </div>
+      </section>
+
+      <footer class="status-bar">
+        <span id="statusText">Pages: 0 | Total: 0 B</span>
+        <span id="limitText">Limit 50</span>
+      </footer>
+
+      <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+      <div class="confirm-overlay hidden" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="confirm-card">
+          <h2 id="confirmTitle">Clear workspace?</h2>
+          <p>This removes every captured page from local extension storage.</p>
+          <div class="confirm-actions">
+            <button class="ghost-button" id="cancelClearButton" type="button">Cancel</button>
+            <button class="danger-button" id="confirmClearButton" type="button">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="turndown.js"></script>
+    <script src="jszip.min.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

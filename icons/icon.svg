@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Markdown Collector icon">
+  <defs>
+    <linearGradient id="bg" x1="16" y1="14" x2="114" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4FD1C5"/>
+      <stop offset="1" stop-color="#8FD14F"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="36" y1="24" x2="94" y2="98" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF3F4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#0C0F14"/>
+  <rect x="14" y="14" width="100" height="100" rx="22" fill="url(#bg)"/>
+  <path d="M38 27h39l18 18v55a7 7 0 0 1-7 7H38a7 7 0 0 1-7-7V34a7 7 0 0 1 7-7Z" fill="url(#paper)"/>
+  <path d="M76 27v18h19" fill="#CFE5E3"/>
+  <path d="M46 78V53h8l10 13 10-13h8v25h-8V65L64 78 54 65v13h-8Z" fill="#0C0F14"/>
+  <path d="M83 82 64 98 45 82h12v-8h14v8h12Z" fill="#007F73"/>
+  <rect x="42" y="42" width="24" height="5" rx="2.5" fill="#94A3B8"/>
+  <rect x="42" y="94" width="42" height="5" rx="2.5" fill="#94A3B8"/>
+</svg>
