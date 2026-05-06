@@ -31,10 +31,14 @@
   }
 
   function trimBlankLines(value) {
-    return value
+    const normalized = value
       .replace(/[ \t]+\n/g, "\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
+      .replace(/\n{3,}/g, "\n\n");
+    const trimmed = normalized
+      .replace(/^(?:[ \t]*\n)+/, "")
+      .replace(/\n+[ \t]*$/, "")
+      .replace(/[ \t]+$/, "");
+    return /^ {4}\S/.test(trimmed) ? trimmed : trimmed.replace(/^[ \t]+/, "");
   }
 
   function escapeMarkdown(value) {
