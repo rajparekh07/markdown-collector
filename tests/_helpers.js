@@ -54,6 +54,54 @@ class TestTextNode {
   }
 }
 
+class TestClassList {
+  constructor(element) {
+    this.element = element;
+  }
+
+  add(...classNames) {
+    const tokens = this.tokens();
+    for (const className of classNames) {
+      if (className) {
+        tokens.add(className);
+      }
+    }
+    this.write(tokens);
+  }
+
+  remove(...classNames) {
+    const tokens = this.tokens();
+    for (const className of classNames) {
+      tokens.delete(className);
+    }
+    this.write(tokens);
+  }
+
+  toggle(className, force) {
+    const tokens = this.tokens();
+    const shouldAdd = force === undefined ? !tokens.has(className) : Boolean(force);
+    if (shouldAdd) {
+      tokens.add(className);
+    } else {
+      tokens.delete(className);
+    }
+    this.write(tokens);
+    return shouldAdd;
+  }
+
+  contains(className) {
+    return this.tokens().has(className);
+  }
+
+  tokens() {
+    return new Set((this.element.className || "").split(/\s+/).filter(Boolean));
+  }
+
+  write(tokens) {
+    this.element.className = Array.from(tokens).join(" ");
+  }
+}
+
 class TestElement {
   constructor(tagName, attributes = {}) {
     this.nodeType = ELEMENT_NODE;
@@ -61,6 +109,10 @@ class TestElement {
     this.attributes = {};
     this.childNodes = [];
     this.parentElement = null;
+    this.dataset = {};
+    this.style = {};
+    this.listeners = {};
+    this.classList = new TestClassList(this);
 
     for (const [name, value] of Object.entries(attributes)) {
       this.setAttribute(name, value);
@@ -104,6 +156,11 @@ class TestElement {
     return this.childNodes.map((child) => child.serialize()).join("");
   }
 
+  set innerHTML(value) {
+    this.childNodes = [new TestTextNode(value)];
+    this.childNodes[0].parentElement = this;
+  }
+
   get content() {
     return this.getAttribute("content") || "";
   }
@@ -123,6 +180,24 @@ class TestElement {
       this.appendChild(typeof node === "string" ? new TestTextNode(node) : node);
     }
   }
+
+  addEventListener(type, listener) {
+    if (!this.listeners[type]) {
+      this.listeners[type] = [];
+    }
+    this.listeners[type].push(listener);
+  }
+
+  removeEventListener(type, listener) {
+    if (!this.listeners[type]) {
+      return;
+    }
+    this.listeners[type] = this.listeners[type].filter((entry) => entry !== listener);
+  }
+
+  focus() {}
+
+  select() {}
 
   remove() {
     if (!this.parentElement) {
@@ -446,6 +521,11 @@ function loadJSZip() {
 
 function loadPopupApi(options = {}) {
   const names = [
+    "state",
+    "elements",
+    "cacheElements",
+    "captureCurrentPage",
+    "addCustomPage",
     "yamlEscape",
     "slugify",
     "displayUrl",
@@ -465,9 +545,15 @@ function loadPopupApi(options = {}) {
     "extractPageContent"
   ];
   const document = options.html ? parseHtmlDocument(options.html) : options.document;
+  const contextOptions = { ...options };
+  delete contextOptions.html;
+  delete contextOptions.url;
+  delete contextOptions.document;
+  delete contextOptions.location;
   const context = createBaseContext({
+    ...contextOptions,
     document,
-    location: { href: options.url || "https://example.com/articles/demo?ref=1" }
+    location: options.location || { href: options.url || "https://example.com/articles/demo?ref=1" }
   });
   runScript("popup.js", context, (source) => source.replace(/\}\)\(\);\s*$/, `window.__popupTestApi = { ${names.join(", ")} };\n})();`));
   return context.window.__popupTestApi;

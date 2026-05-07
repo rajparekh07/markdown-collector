@@ -7,7 +7,8 @@ const modules = [
   "./test_turndown",
   "./test_jszip",
   "./test_utils",
-  "./test_content"
+  "./test_content",
+  "./test_ordering"
 ];
 
 async function main() {

@@ -407,7 +407,7 @@
         html: data.html
       };
 
-      state.pages.unshift(page);
+      state.pages.push(page);
       state.selectedIds.add(page.id);
       state.activePanel = "pages";
       await savePages();
@@ -519,7 +519,7 @@
       timestamp: Date.now(),
       html: ""
     };
-    state.pages.unshift(page);
+    state.pages.push(page);
     state.selectedIds.add(page.id);
     await savePages();
     syncBadge();
